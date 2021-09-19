@@ -3,14 +3,15 @@ import { Client, QueryConfig } from 'pg';
 
 class PostgresProductService implements ProductServiceInterface {
 
-    private tableName = 'products';
+    private tableName1 = 'products';
+    private tableName2 = 'stocks';
 
     constructor(private databaseClient: Client){}
 
     async getProductById(id: string): Promise<ProductInterface> {
 
         const query = {
-            text: `SELECT * FROM ${this.tableName} WHERE id = $1`,
+            text: `SELECT p.*,s.count FROM ${this.tableName1} p JOIN ${this.tableName2} s ON p.id = s.product_id WHERE p.id = $1`,
             values: [id],
         } as QueryConfig;
 
@@ -20,7 +21,7 @@ class PostgresProductService implements ProductServiceInterface {
 
     async getAllProducts(): Promise<ProductInterface[]> {
         const query = {
-            text: `SELECT * FROM ${this.tableName}`,
+            text: `SELECT p.*,s.count FROM ${this.tableName1} p JOIN ${this.tableName2} s ON p.id = s.product_id`
         } as QueryConfig;
 
         const result = await this.databaseClient.query(query);
@@ -29,7 +30,11 @@ class PostgresProductService implements ProductServiceInterface {
 
     async create(product: Pick<ProductInterface, 'title' | 'description' | 'price' | 'logo' | 'count'>) {
         const query = {
-            text: `INSERT INTO ${this.tableName}(title, description, price, logo, count) VALUES($1, $2, $3, $4, $5) RETURNING *`,
+            text: `WITH val AS(
+                        INSERT INTO ${this.tableName1} (title, description, price, logo) VALUES($1, $2, $3, $4) RETURNING id)
+                    INSERT INTO stocks (product_id, count)
+                    SELECT id, $5
+                    FROM val`,
             values: [product.title, product.description, product.price, product.logo, product.count],
         };
         const result = await this.databaseClient.query(query);
