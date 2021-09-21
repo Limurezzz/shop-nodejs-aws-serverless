@@ -6,7 +6,11 @@ export const createProductHandler = (productService: ProductServiceInterface) =>
     try {
         winstonLogger.logRequest(`Incoming event: ${ JSON.stringify( event ) }`);
 
-        const product = await productService.create(event.body);
+        let body = event.body;
+        if (typeof body === 'string') {
+            body = JSON.parse(body);
+        }
+        const product = await productService.create(body);
 
         winstonLogger.logRequest(`Created product: ${ JSON.stringify( product ) }`);
 
