@@ -44,9 +44,12 @@ functions:
               querystrings:
                 name: true
   importFileParser:
-    handler: handler.importFileParse
+    handler: handler.importFileParser
     events:
       - s3:
-        bucket: uploaded
-        event: s3:ObjectCreated:*
-        existing: true
+          bucket: ${self:custom.webpack.dotenvVars.BUCKET, env:BUCKET, ''}
+          event: s3:ObjectCreated:*
+          existing: true
+          rules:
+            - prefix: uploaded/
+            - suffix: .cvs
