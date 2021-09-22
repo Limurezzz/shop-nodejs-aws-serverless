@@ -8,17 +8,19 @@ provider:
   runtime: nodejs12.x
   stage: ${opt:stage, 'dev'}
   region: us-east-1
+  environment:
+    BUCKET: ${self:custom.webpack.dotenvVars.BUCKET, env:BUCKET, ''}
 
   iamRoleStatements:
     - Effect: "Allow"
       Action: "s3:ListBucket"
       Resource:
-        - "arn:aws:s3:::node-in-aws-cloud-catalogs"
+        - "arn:aws:s3:::appuploaded"
     - Effect: "Allow"
       Action:
         - "s3:*"
       Resource:
-        - "arn:aws:s3:::node-in-aws-cloud-catalogs/*"
+        - "arn:aws:s3:::appuploaded/*"
 
 plugins:
   - serverless-webpack
@@ -41,10 +43,10 @@ functions:
             parameters:
               querystrings:
                 name: true
-
   importFileParser:
-    handler: handler.importFileParser
+    handler: handler.importFileParse
+    events:
       - s3:
-          bucket: uploaded
-          event: s3:ObjectCreated:*
-          existing: true
+        bucket: uploaded
+        event: s3:ObjectCreated:*
+        existing: true
