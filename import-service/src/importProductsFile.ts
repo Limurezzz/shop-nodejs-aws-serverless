@@ -15,9 +15,9 @@ export const importProductsFile = ({
             ContentType: 'text/csv'
         };
     
-        const url = await s3.getSignedUrlPromise('putObject', params)
-    
+        const url = await s3.getSignedUrlPromise('putObject', params);
         return successResponse(url);
+        
     } catch (error) {
         errorResponse(error);
     }

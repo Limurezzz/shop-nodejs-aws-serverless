@@ -5,7 +5,8 @@ export const importFileParser = ({
     s3,
     logger,
 }) => async (event) => {
-    event.Records.forEach(record => {        
+    event.Records.forEach(record => {   
+        logger.log(record.s3.object.key);
         const s3Stream = s3.getObject({
             Bucket: BUCKET,
             Key: record.s3.object.key
